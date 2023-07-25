@@ -1,0 +1,29 @@
+import pandas as pd
+from pandasql import sqldf
+
+# Define the SQL query function
+pysqldf = lambda q: sqldf(q, globals())
+
+# Load the CSV file into a pandas DataFrame
+orders = pd.read_csv('orders.csv', sep=',')
+products = pd.read_csv('products.csv', sep=',')
+
+# Execute the SQL query
+query = """
+    SELECT products.Category, products.Price, orders.Quantity
+    FROM products
+    JOIN orders ON products.ProductID = orders.ProductID;
+"""
+result = pysqldf(query)
+
+# Calculate TotalRevenue in Python
+result['TotalRevenue'] = result['Price'] * result['Quantity']
+
+# Group the data to get the sum of TotalRevenue per category
+grouped_result = result.groupby('Category')['TotalRevenue'].sum().reset_index()
+
+# Sort the result in descending order by TotalRevenue
+sorted_result = grouped_result.sort_values(by='TotalRevenue', ascending=False)
+
+# Print the result
+print(sorted_result)

@@ -1,0 +1,24 @@
+import pandas as pd
+from pandasql import sqldf
+
+# Define the SQL query function
+pysqldf = lambda q: sqldf(q, globals())
+
+# Load the CSV file into a pandas DataFrame
+orders = pd.read_csv('orders.csv', sep=',')
+customers = pd.read_csv('customers.csv', sep=',')
+
+# Execute the SQL query
+query = """
+    SELECT COUNT(CustomerID) AS ReturningCustomers
+    FROM (
+    SELECT CustomerID, COUNT(DISTINCT strftime('%Y-%m', OrderDate)) AS NumPurchases
+    FROM orders
+    GROUP BY CustomerID
+    ) AS CustomerPurchases
+    WHERE NumPurchases >= 2;
+"""
+result = pysqldf(query)
+
+# Print the result
+print(result)

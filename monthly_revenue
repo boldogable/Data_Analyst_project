@@ -1,0 +1,28 @@
+import pandas as pd
+from pandasql import sqldf
+
+# Define the SQL query function
+pysqldf = lambda q: sqldf(q, globals())
+
+# Load the CSV file into a pandas DataFrame
+orders = pd.read_csv('orders.csv', sep=',')
+products = pd.read_csv('products.csv', sep=',')
+
+# Execute the SQL query
+query = """
+    SELECT strftime('%Y-%m', OrderDate) AS Month, Price, Quantity
+    FROM orders;
+"""
+result = pysqldf(query)
+
+# Calculate TotalRevenue in Python
+result['TotalRevenue'] = result['Price'] * result['Quantity']
+
+# Group the data to get the sum of TotalRevenue per month
+grouped_result = result.groupby('Month')['TotalRevenue'].sum().reset_index()
+
+# Sort the result by Month
+sorted_result = grouped_result.sort_values(by='Month')
+
+# Print the result
+print(sorted_result)
